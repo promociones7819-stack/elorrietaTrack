@@ -56,6 +56,11 @@ export async function adminLicenses(request,env,path,json){
  if(path==='/api/admin/licenses'&&request.method==='GET'){
   const {results}=await env.AUTH.prepare('SELECT id,label,owner_email,key_ciphertext,plan,expires_at,active,activated_at,created_at FROM licenses ORDER BY created_at DESC').all();return json({licenses:await Promise.all(results.map(async({key_ciphertext,...row})=>({...row,key:await unseal(key_ciphertext,env,row.id)})))});
  }
+ const deleteId=path.match(/^\/api\/admin\/licenses\/([a-f0-9-]+)$/)?.[1];
+ if(deleteId&&request.method==='DELETE'){
+  const result=await env.AUTH.prepare('DELETE FROM licenses WHERE id=?').bind(deleteId).run();
+  return result.meta.changes?json({ok:true}):json({error:'La licencia ya no existe.'},404);
+ }
  const b=await request.json();
  if(path==='/api/admin/licenses'&&request.method==='POST'){
   if(typeof b.label!=='string'||!b.label.trim()||b.label.length>150||!Number.isSafeInteger(b.expiresAt)||b.expiresAt<=Date.now())return json({error:'Indica un nombre y una fecha futura.'},400);

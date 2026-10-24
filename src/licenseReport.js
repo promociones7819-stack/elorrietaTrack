@@ -4,7 +4,7 @@ export function licenseStatus(l,now=Date.now()){
  return l.activated_at?'Activa':'Pendiente de activar';
 }
 export function filterLicenses(rows,filter='all',query='',now=Date.now()){
- return rows.filter(l=>{const status=licenseStatus(l,now);return (filter==='all'||filter==='active'&&status==='Activa'||filter==='pending'&&status==='Pendiente de activar'||filter==='expired'&&status==='Caducada'||filter==='blocked'&&status==='Bloqueada')&&[l.label,l.owner_email,l.id,l.key].join(' ').toLocaleLowerCase().includes(query.trim().toLocaleLowerCase());});
+ return rows.filter(l=>{const status=licenseStatus(l,now);return (filter==='all'||filter==='active'&&status==='Activa'||filter==='inactive'&&(status==='Pendiente de activar'||status==='Caducada')||filter==='pending'&&status==='Pendiente de activar'||filter==='expired'&&status==='Caducada'||filter==='blocked'&&status==='Bloqueada')&&[l.label,l.owner_email,l.id,l.key].join(' ').toLocaleLowerCase().includes(query.trim().toLocaleLowerCase());});
 }
 let library;
 async function pdfLibrary(){if(window.PDFLib)return window.PDFLib;if(!library)library=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='/vendor/pdf-lib.min.js';s.onload=()=>resolve(window.PDFLib);s.onerror=()=>reject(Error('No se pudo cargar el generador PDF.'));document.head.append(s);}).catch(e=>{library=null;throw e;});return library;}
